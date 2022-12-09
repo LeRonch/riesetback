@@ -7,16 +7,32 @@ from .serializers import RegisterSerializer
 from django.core.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework import views
-from django.core.files.storage import FileSystemStorage
+from rest_framework.pagination import PageNumberPagination
+
+def customPagination(page_size):
+    return type("SubClass", (PageNumberPagination,), {"page_size": page_size})
 
 class UserListView(generics.ListAPIView):
     """
     get: Search or get users
     """
+    permission_classes = (permissions.AllowAny, )
+
     queryset = User.objects.all()
     serializer_class = UserSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('email', 'username')
+
+class UserView(views.APIView):
+    """
+    get: receive user id, return user
+    """
+    permission_classes = (permissions.AllowAny, )
+
+    def get(self, request, *args, **kwargs):
+        id= self.kwargs['id']
+        data = User.objects.get(id=id)
+        return Response(UserSerializer(instance=data).data)
 
 class RegisterView(views.APIView):
     """
@@ -50,3 +66,13 @@ class RegisterView(views.APIView):
             data = {'success': False, 'message': str(err)}
 
         return Response(data)
+
+class TagsView(generics.ListAPIView):
+
+    """
+    get: get tags
+    """
+    permission_classes = (permissions.AllowAny, )
+    pagination_class = customPagination(page_size=50)
+    queryset = Tag.objects.all()
+    serializer_class = TagsSerializer
