@@ -2,7 +2,7 @@ from pyexpat import model
 from pkg_resources import require
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from api.models import Tag, UserPicture
+from api.models import Creation, Tag, UserPicture
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 
@@ -53,7 +53,28 @@ class CurrentUserSerializer(serializers.ModelSerializer):
         model = User
         fields =['id', 'email', 'username', 'profile_picture']
 
+class UserCreationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Creation
+        fields = '__all__'
+
 class TagsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
+        fields = '__all__'
+
+class UploadCreationSerializer(serializers.ModelSerializer):
+    """to JSON"""
+
+    title = serializers.CharField(required=True)
+    creation = serializers.ImageField(required=True)
+    description = serializers.CharField(required=False)
+    type = serializers.CharField(required=True)
+    date = serializers.DateTimeField(required=False)
+    tags = TagsSerializer(read_only=True, many=True)
+    tags_list = serializers.ListField(required=True)
+    user_id = serializers.IntegerField(required=True)
+
+    class Meta:
+        model = Creation
         fields = '__all__'

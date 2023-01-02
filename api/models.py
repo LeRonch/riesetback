@@ -55,8 +55,9 @@ class Creation(models.Model):
     )
     type = models.CharField(max_length=5)
     download_count = models.IntegerField(default=0)
+    fav_count = models.IntegerField(default=0)
     date = models.DateTimeField()
-    tags = models.ManyToManyField(Tag, blank=True )
+    tags = models.ManyToManyField(Tag, blank=False)
 
     def __str__(self):
         return self.title
