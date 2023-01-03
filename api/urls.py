@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import RegisterView, TagsView, UploadCreationView, CreationByUserView, CreationByIdView, TagByIdView
+from .views import RegisterView, TagsView, UploadCreationView, CreationByUserView, CreationByIdView, TagByIdView, CreationByTagId, CreationByName
 
 router = DefaultRouter()
 
@@ -12,6 +12,8 @@ urlpatterns = [
     # path('comments/<int:id>/', name='comments'),
     # path('creations', name='creations'),
     path('creation/<int:id>/',CreationByIdView.as_view(), name='creation'),
+    path('creationtag/<int:id>/',CreationByTagId.as_view(), name='creationtag'),
+    path('creationname/<str:name>/',CreationByName.as_view(), name='creationtag'),
     path('tags/',TagsView.as_view(), name='tags'),
     path('tag/<int:id>',TagByIdView.as_view(), name='tag'),
     path('register/', RegisterView.as_view(), name='register'),

@@ -158,3 +158,23 @@ class CreationByIdView(views.APIView):
         id = self.kwargs['id']
         queryset = Creation.objects.filter(id=id)
         return Response(UserCreationSerializer(instance=queryset, many=True).data)
+
+class CreationByTagId(views.APIView):
+    """
+    get: creation by tag id
+    """
+    permission_classes = (permissions.AllowAny, )
+    def get(self, request, *args, **kwargs):
+        id = self.kwargs['id']
+        queryset = Creation.objects.filter(tags=id)
+        return Response(UserCreationSerializer(instance=queryset, many=True).data)
+
+class CreationByName(views.APIView):
+    """
+    get: creation by name
+    """
+    permission_classes = (permissions.AllowAny, )
+    def get(self, request, *args, **kwargs):
+        name = self.kwargs['name']
+        queryset = Creation.objects.filter(title__icontains=name)
+        return Response(UserCreationSerializer(instance=queryset, many=True).data)
