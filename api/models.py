@@ -1,4 +1,3 @@
-from re import L
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -29,6 +28,7 @@ class UserPicture(models.Model):
         blank=True,
         on_delete=models.PROTECT,
     )
+    description = models.TextField(null=True, max_length=300)
 
     def __str__(self):
         return self.user.username
@@ -58,6 +58,7 @@ class Creation(models.Model):
     fav_count = models.IntegerField(default=0)
     date = models.DateTimeField()
     tags = models.ManyToManyField(Tag, blank=False)
+    favorite = models.ManyToManyField(User, related_name='favorite', blank=True)
 
     def __str__(self):
         return self.title

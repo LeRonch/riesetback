@@ -10,6 +10,8 @@ from rest_framework.response import Response
 from rest_framework import views
 from rest_framework.pagination import PageNumberPagination
 import re
+from django.db.models import F
+
 
 def customPagination(page_size):
     return type("SubClass", (PageNumberPagination,), {"page_size": page_size})
@@ -61,7 +63,11 @@ class RegisterView(views.APIView):
             user.save()
             user_picture = UserPicture.objects.create(
                 user=user,
-                profile_picture=upload
+                profile_picture=upload,
+                twitter_link='null',
+                patreon_link='null',
+                paypal_link='null',
+                description='null'
             )
             user_picture.save()
         except ValidationError as err:
@@ -159,7 +165,7 @@ class CreationByIdView(views.APIView):
         queryset = Creation.objects.filter(id=id)
         return Response(UserCreationSerializer(instance=queryset, many=True).data)
 
-class CreationByTagId(views.APIView):
+class CreationByTagIdView(views.APIView):
     """
     get: creation by tag id
     """
@@ -169,7 +175,7 @@ class CreationByTagId(views.APIView):
         queryset = Creation.objects.filter(tags=id)
         return Response(UserCreationSerializer(instance=queryset, many=True).data)
 
-class CreationByName(views.APIView):
+class CreationByNameView(views.APIView):
     """
     get: creation by name
     """
@@ -178,3 +184,144 @@ class CreationByName(views.APIView):
         name = self.kwargs['name']
         queryset = Creation.objects.filter(title__icontains=name)
         return Response(UserCreationSerializer(instance=queryset, many=True).data)
+
+class CreationFavView(views.APIView):
+    """
+    get: 5 top creation
+    """
+    permission_classes = (permissions.AllowAny, )
+    def get(self, request, *args, **kwargs):
+        queryset = Creation.objects.all().order_by('-fav_count')[:5]
+        return Response(UserCreationSerializer(instance=queryset, many=True).data)
+
+class CreationLatestView(views.APIView):
+    """
+    get: 5 last creation
+    """
+    permission_classes = (permissions.AllowAny, )
+    def get(self, request, *args, **kwargs):
+        queryset = Creation.objects.all().order_by('-date')[:5]
+        return Response(UserCreationSerializer(instance=queryset, many=True).data)
+
+class LinksView(views.APIView):
+    """
+    put: updte links
+    """
+    permission_classes = (permissions.AllowAny, )
+    def put(self, request):
+
+        serializer = ProfilePictureSerializer(data=request.data)
+        data = []
+
+        try:
+            serializer.is_valid(raise_exception=True)
+            user = request.data['user_id']
+            twitter = serializer.validated_data['twitter_link']
+            paypal = serializer.validated_data['paypal_link']
+            patreon = serializer.validated_data['patreon_link']
+
+            UserPicture.objects.filter(user=user).update(twitter_link=twitter, paypal_link=paypal, patreon_link=patreon)
+
+        except ValidationError as err:
+            data = {'success': False, 'message': str(err)}
+
+        return Response(data)
+
+class DowloadCountIncreaseView(views.APIView):
+    """
+    put: increase download count
+    """
+    permission_classes = (permissions.AllowAny, )
+    def post(self, request):
+
+        serializer = IncreaseDownloadCountSerializer(data=request.data)
+        data = []
+
+        try:
+            serializer.is_valid(raise_exception=True)
+            creation_id = request.data['creation_id']
+
+            Creation.objects.filter(id=creation_id).update(download_count = F('download_count') + 1)
+
+        except ValidationError as err:
+            data = {'success': False, 'message': str(err)}
+
+        return Response(data)
+
+class PostFavoriteView(views.APIView):
+    """
+    post: add to favorite
+    """
+    permission_classes = (permissions.AllowAny, )
+
+    def post(self, request):
+
+        data = []
+
+        try:
+            creation_id = request.data['creation_id']
+            user_id = request.data['user_id']
+
+            Creation.objects.filter(id=creation_id).update(fav_count = F('fav_count') + 1)
+            creation = Creation.objects.get(id=creation_id)
+            user = User.objects.get(id=user_id)
+            creation.favorite.add(user)
+
+        except ValidationError as err:
+            data = {'success': False, 'message': str(err)}
+
+        return Response(data)
+
+class DeleteFavoriteView(views.APIView):
+    """
+    delete: delete favorite
+    """
+    permission_classes = (permissions.AllowAny, )
+
+    def delete(self, request):
+
+        data = []
+
+        try:
+            creation_id = request.data['creation_id']
+            user_id = request.data['user_id']
+
+            Creation.objects.filter(id=creation_id).update(fav_count = F('fav_count') - 1)
+            creation = Creation.objects.get(id=creation_id)
+            user = User.objects.get(id=user_id)
+            creation.favorite.remove(user)
+
+        except ValidationError as err:
+            data = {'success': False, 'message': str(err)}
+
+        return Response(data)
+
+class FavCreationByIdView(views.APIView):
+    """
+    get: fav creation by user id
+    """
+    permission_classes = (permissions.AllowAny, )
+    def get(self, request, *args, **kwargs):
+        id = self.kwargs['id']
+        queryset = Creation.objects.filter(favorite=id)
+        return Response(UserCreationSerializer(instance=queryset, many=True).data)
+
+class DescriptionView(views.APIView):
+    """
+    put: user desc
+    """
+    permission_classes = (permissions.AllowAny, )
+
+    def put(self, request):
+        print('eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee', request.data)
+        data = []
+        try:
+            user = request.data['user_id']
+            description = request.data['description']
+
+            UserPicture.objects.filter(user=user).update(description=description)
+
+        except ValidationError as err:
+            data = {'success': False, 'message': str(err)}
+
+        return Response(data)

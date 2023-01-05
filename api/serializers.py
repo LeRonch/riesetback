@@ -1,5 +1,4 @@
-from pyexpat import model
-from pkg_resources import require
+from dataclasses import field, fields
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from api.models import Creation, Tag, UserPicture
@@ -17,6 +16,13 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'email', 'date_joined', 'profile_picture']
+
+
+class UserInfoSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ['id', 'username']
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
@@ -53,10 +59,18 @@ class CurrentUserSerializer(serializers.ModelSerializer):
         model = User
         fields =['id', 'email', 'username', 'profile_picture']
 
+class CreationFavSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Creation
+        fields= ['favorite']
+
 class UserCreationSerializer(serializers.ModelSerializer):
+    user = UserInfoSerializer()
+
     class Meta:
         model = Creation
         fields = '__all__'
+
 
 class TagsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -73,8 +87,14 @@ class UploadCreationSerializer(serializers.ModelSerializer):
     date = serializers.DateTimeField(required=False)
     tags = TagsSerializer(read_only=True, many=True)
     tags_list = serializers.ListField(required=True)
+    fav = CreationFavSerializer(read_only=True, many=True)
     user_id = serializers.IntegerField(required=True)
 
     class Meta:
         model = Creation
         fields = '__all__'
+
+class IncreaseDownloadCountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Creation
+        fields = ['download_count']
