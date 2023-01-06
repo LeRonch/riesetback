@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import RegisterView, TagsView, UploadCreationView, CreationByUserView, CreationByIdView, TagByIdView, CreationByTagIdView, CreationByNameView, CreationLatestView, CreationFavView, LinksView, DowloadCountIncreaseView, PostFavoriteView, DeleteFavoriteView, FavCreationByIdView, DescriptionView
+from .views import RegisterView, TagsView, UploadCreationView, CreationByUserView, CreationByIdView, TagByIdView, CreationByTagIdView, CreationByNameView, CreationLatestView, CreationFavView, LinksView, DowloadCountIncreaseView, PostFavoriteView, DeleteFavoriteView, FavCreationByIdView, DescriptionView, PostCommentView, GetCommentsView
 
 router = DefaultRouter()
 
@@ -8,8 +8,6 @@ from api.views import *
 urlpatterns = [
     path('users/', UserListView.as_view(), name='users_list'),
     path('user/<int:id>/', UserView.as_view(), name='user'),
-    # path('user_profile/<int:id>/', name='user_profile'),
-    # path('comments/<int:id>/', name='comments'),
     path('creationsfav/',CreationFavView.as_view(), name='creationsfav'),
     path('creationslatest/',CreationLatestView.as_view(), name='creationslatest'),
     path('creation/<int:id>/',CreationByIdView.as_view(), name='creation'),
@@ -18,6 +16,8 @@ urlpatterns = [
     path('favcreation/<int:id>/',FavCreationByIdView.as_view(), name='favcreation'),
     path('tags/',TagsView.as_view(), name='tags'),
     path('tag/<int:id>',TagByIdView.as_view(), name='tag'),
+    path('comment/',PostCommentView.as_view(), name='comment'),
+    path('comments/<int:id>',GetCommentsView.as_view(), name='comment'),
     path('dowloadcount/',DowloadCountIncreaseView.as_view(), name='dowloadcount'),
     path('postfavorite/', PostFavoriteView.as_view(), name='postfavorite'),
     path('deletefavorite/', DeleteFavoriteView.as_view(), name='deletefavorite'),

@@ -1,7 +1,7 @@
 from dataclasses import field, fields
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from api.models import Creation, Tag, UserPicture
+from api.models import Comment, Creation, Tag, UserPicture
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 
@@ -98,3 +98,10 @@ class IncreaseDownloadCountSerializer(serializers.ModelSerializer):
     class Meta:
         model = Creation
         fields = ['download_count']
+
+class CommentSerializer(serializers.ModelSerializer):
+    commenting_user = UserInfoSerializer()
+
+    class Meta:
+        model = Comment
+        fields = '__all__'

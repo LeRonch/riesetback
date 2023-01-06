@@ -1,5 +1,6 @@
 # *coding: utf-8*
 from datetime import datetime
+from api.models import Comment
 from api.serializers import *
 from rest_framework import generics
 from django_filters.rest_framework import DjangoFilterBackend
@@ -313,7 +314,6 @@ class DescriptionView(views.APIView):
     permission_classes = (permissions.AllowAny, )
 
     def put(self, request):
-        print('eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee', request.data)
         data = []
         try:
             user = request.data['user_id']
@@ -325,3 +325,46 @@ class DescriptionView(views.APIView):
             data = {'success': False, 'message': str(err)}
 
         return Response(data)
+
+class PostCommentView(views.APIView):
+    """
+    post: comment
+    """
+    permission_classes = (permissions.AllowAny, )
+
+    def post(self, request):
+        data = []
+        try:
+            user_id = request.data['user_id']
+            creation_id = request.data['creation_id']
+            content = request.data['comment']
+            date = datetime.now()
+
+            user = User.objects.get(id = user_id)
+            creation = Creation.objects.get(id = creation_id)
+
+            comment = Comment.objects.create(
+                content = content,
+                commenting_user = user,
+                creation = creation,
+                date = date
+            )
+
+            comment.save()
+
+        except ValidationError as err:
+            data = {'success': False, 'message': str(err)}
+
+        return Response(data)
+
+
+class GetCommentsView(views.APIView):
+    """
+    get: comments for a creation
+    """
+    permission_classes = (permissions.AllowAny, )
+
+    def get(self, request, *args, **kwargs):
+        id = self.kwargs['id']
+        queryset = Comment.objects.filter(creation=id).order_by('-date')
+        return Response(CommentSerializer(instance=queryset, many=True).data)
