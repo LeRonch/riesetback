@@ -297,6 +297,25 @@ class DeleteFavoriteView(views.APIView):
 
         return Response(data)
 
+class DeleteCreationView(views.APIView):
+    """
+    delete: delete creation
+    """
+    permission_classes = (permissions.AllowAny, )
+
+    def delete(self, request):
+
+        data = []
+
+        try:
+            creation_id = request.data['creation_id']
+            Creation.objects.get(id=creation_id).delete()
+
+        except ValidationError as err:
+            data = {'success': False, 'message': str(err)}
+
+        return Response(data)
+
 class FavCreationByIdView(views.APIView):
     """
     get: fav creation by user id

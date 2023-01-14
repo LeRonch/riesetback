@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import RegisterView, TagsView, UploadCreationView, CreationByUserView, CreationByIdView, TagByIdView, CreationByTagIdView, CreationByNameView, CreationLatestView, CreationFavView, LinksView, DowloadCountIncreaseView, PostFavoriteView, DeleteFavoriteView, FavCreationByIdView, DescriptionView, PostCommentView, GetCommentsView
+from .views import UserListView, UserView, RegisterView, TagsView, UploadCreationView, CreationByUserView, CreationByIdView, TagByIdView, CreationByTagIdView, CreationByNameView, CreationLatestView, CreationFavView, LinksView, DowloadCountIncreaseView, PostFavoriteView, DeleteFavoriteView, FavCreationByIdView, DescriptionView, PostCommentView, GetCommentsView, DeleteCreationView
 
 router = DefaultRouter()
 
@@ -14,6 +14,7 @@ urlpatterns = [
     path('creationname/<str:name>/',CreationByNameView.as_view(), name='creationtag'),
     path('creationtag/<int:id>/',CreationByTagIdView.as_view(), name='creationtag'),
     path('favcreation/<int:id>/',FavCreationByIdView.as_view(), name='favcreation'),
+    path('deletecreation/',DeleteCreationView.as_view(), name='favcreation'),
     path('tags/',TagsView.as_view(), name='tags'),
     path('tag/<int:id>',TagByIdView.as_view(), name='tag'),
     path('comment/',PostCommentView.as_view(), name='comment'),
